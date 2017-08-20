@@ -1,74 +1,74 @@
 #include <iostream>
 #include <vector>
 using namespace std;
+const int inf = 100000;
+const int MAX = 501;
+int N, M, S, D;//题目所给的信息
 struct road {
-	int dist;
+	int length = inf;
 	int cost;
-};
-const int inf = 10000;
-void dijkstra(vector<road> &distance, vector< vector<road> > n_map, vector< vector<bool> > &edge, int from){
-	vector<bool> visit(distance.size(), false);
-	distance[from] = { 0, 0 };
-	for(int i = 0; i < distance.size(); i++){
-		int min = inf;
-		for(int j = 0; j < visit.size(); j++)
-			if(distance[j].dist < distance[min].dist && !visit[j])
-				min = j;
+};//用结构体存储两权值信息
+road edge[MAX][MAX];//权值邻接表
+vector<int> dist(MAX, inf);
+vector<int> dijk[MAX];//dijkstra需要更改的邻接链表（向量数组）
+vector<int> temppath, path;//供DFS使用
+void dijkstra(int start){
+	vector<bool> visit(MAX, false);
+	dist[start] = 0;
+	for(int i = 0; i < N; i++){
+		int min = MAX - 1;
+		for(int i = 0; i < N; i++)
+			if(dist[i] < dist[min] && !visit[i])
+				min = i;
+		if(min == MAX - 1)
+			break;
 		visit[min] = true;
-		for(int j = 0; j < distance.size(); j++)
-			if(n_map[min][j].dist != inf && !visit[j])
-				if(distance[min].dist + n_map[min][j].dist < distance[j].dist){
-					distance[j].dist = distance[min].dist + n_map[min][j].dist;
-					edge[min][j] = false;
-				}
+		for(int i = 0; i < N; i++)
+			if(edge[min][i].length != inf && !visit[i]){
+				if(dist[i] > dist[min] + edge[min][i].length){
+					dist[i] = dist[min] + edge[min][i].length;
+					dijk[i].clear();
+					dijk[i].push_back(min);
+				}else if(dist[i] == dist[min] + edge[min][i].length)
+					dijk[i].push_back(min);
+			}
 	}
 }
-vector<bool> dfs_visit(510, false);
-vector<int> path_record;
-bool flag = false;
-void dfs(vector< vector<road> > n_map, vector< vector<bool> > short_edge, int from, int to){
-	dfs_visit[from] = true;
-	if(from == to || flag){
-		dfs_visit.push_back(from);
-		flag = true;
+int min_cost = inf;
+void DFS(int node){
+	if(node == S){
+		temppath.push_back(node);
+		int cost_cnt = 0;
+		for(int i = temppath.size() - 1; i > 0; i--)
+			cost_cnt += edge[temppath[i]][temppath[i - 1]].cost;
+		if(cost_cnt < min_cost)
+			min_cost = cost_cnt, path = temppath;
+		temppath.pop_back();
 		return;
 	}
-	for(int i = 0; i < n_map.size(); i++)
-		if(n_map[from][i].dist != inf && short_edge[from][i] && !dfs_visit[i])
-			dfs(n_map, short_edge, i, to);
-}
-int main(){
-	int N, M, S, D;
-	cin >> N >> M >> S >> D;
-	vector<road> t(N, { inf, inf });
-	vector< vector<road> > road_map(N, t);
-	vector<bool> s(N, false);
-	vector< vector<bool> > edge_record(N, s);
-	for(int i = 0; i < M; i++){
-		int c1, c2, di, co;
-		cin >> c1 >> c2 >> di >> co;
-		road_map[c1][c2] = road_map[c2][c1] = { di, co };
-		edge_record[c1][c2] = edge_record[c2][c1] = true;
-	}
-	dijkstra(t, road_map, edge_record, S);
-	dfs(road_map, edge_record, S, D);
-	cout << path_record[path_record.size() - 1];
-	int total_dist = 0, total_cost = 0; 
-	for(int i = path_record.size() - 2; i >= 0; i--){
-		cout << " " << path_record[i];
-		total_cost += road_map[i - 1][i].cost;
-	}
-	cout << " " << t[D].dist << " " << total_cost << endl;
-	return 0;
+	temppath.push_back(node);
+	for(int i = 0; i < dijk[node].size(); i++)
+		DFS(dijk[node][i]);
+	temppath.pop_back();
 }
 /**
-6 8 0 3
-0 1 1 12
-1 5 4 20
-0 5 2 9
-5 2 9 30
-2 4 3 13
-0 4 5 2
-0 3 6 46
-4 3 2 42
+ * 注释：这里的DFS必须从D到S回溯，反向并不能得到预期的结果。
+ * 现在能给出的解释是，从D开始回溯能直接回溯到S（因为Djikstra
+ * 会得到一棵最短路径树————当然，题目中会存在权值相同的简单环
+ * 路————从叶子开始回溯可以最快得到需要的路径）
  */
+int main(){
+	cin >> N >> M >> S >> D;
+	for(int i = 0; i < M; i++){
+		int a, b;
+		cin >> a >> b;
+		cin >> edge[a][b].length >> edge[a][b].cost;
+		edge[b][a] = edge[a][b];
+	}
+	dijkstra(S);
+	DFS(D);
+	for(int i = path.size() - 1; i >= 0; i--)
+		cout << path[i] << " ";
+	cout << dist[D] << " " << min_cost << endl;
+	return 0;
+}
