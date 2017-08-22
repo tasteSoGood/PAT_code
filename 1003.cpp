@@ -3,35 +3,33 @@
 using namespace std;
 const int inf = 100000, MAX = 501;
 int N, M, C1, C2;
-int rescue[MAX];
-struct road { int weigh = inf; };
+int rescue[MAX];//点权
+struct road { int weight = inf; };
 road map[MAX][MAX];
-vector<int> dist(MAX, inf), path_num(MAX), ver_cnt(MAX);
+vector<int> dist(MAX, inf), path_cnt(MAX, 0), ver_cnt(MAX, 0);
 void dijkstra(int start){
-	dist[start] = 0;
-	path_num[start] = 1;
-	ver_cnt[start] = rescue[start];
 	vector<bool> visit(N, false);
+	dist[start] = 0;
+	path_cnt[start] = 1;
+	ver_cnt[start] = rescue[start];
 	for(int i = 0; i < N; i++){
 		int min = MAX - 1;
-		for(int i = 0; i < N; i++)
-			if(dist[i] < dist[min] && !visit[i])
-				min = i;
+		for(int j = 0; j < N; j++)
+			if(dist[j] < dist[min] && !visit[j])
+				min = j;
 		if(min == MAX - 1)
 			break;
 		visit[min] = true;
-		for(int i = 0; i < N; i++)
-			if(map[min][i].weigh != inf && !visit[i]){
-				if(dist[i] > dist[min] + map[min][i].weigh){
-					dist[i] = dist[min] + map[min][i].weigh;
-					path_num[i] = path_num[min];//路径计数
-					ver_cnt[i] = ver_cnt[min] + rescue[i];//点权计数
-				}
-				else if(dist[i] == dist[min] + map[min][i].weigh){
-					path_num[i] += path_num[min];
-					if(ver_cnt[i] < rescue[i] + ver_cnt[min])
-						ver_cnt[i] = rescue[i] + ver_cnt[min];
-				}
+		for(int j = 0; j < N; j++)
+			if(dist[j] > dist[min] + map[min][j].weight){
+				dist[j] = dist[min] + map[min][j].weight;
+				path_cnt[j] = path_cnt[min];
+				ver_cnt[j] = ver_cnt[min] + rescue[j];
+			}
+			else if(dist[j] == dist[min] + map[min][j].weight){
+				path_cnt[j] += path_cnt[min];
+				if(ver_cnt[j] < ver_cnt[min] + rescue[j])
+					ver_cnt[j] = ver_cnt[min] + rescue[j];
 			}
 	}
 }
@@ -40,12 +38,11 @@ int main(){
 	for(int i = 0; i < N; i++)
 		cin >> rescue[i];
 	for(int i = 0; i < M; i++){
-		int a, b;
-		cin >> a >> b;
-		cin >> map[a][b].weigh;
-		map[b][a] = map[a][b];
+		int a, b, t;
+		cin >> a >> b >> t;
+		map[b][a].weight = map[a][b].weight = t;
 	}
 	dijkstra(C1);
-	cout << path_num[C2] << " " << ver_cnt[C2] << endl;
+	cout << path_cnt[C2] << " " << ver_cnt[C2] << endl;
 	return 0;
 }
