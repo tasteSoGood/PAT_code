@@ -3,38 +3,35 @@
 #include <map>
 using namespace std;
 int main(){
-	int k;
+	int k, cnt = 1;
 	string s;
 	cin >> k >> s;
-	map<char, int> record;
-	char t = s[0];
-	int cnt = 1, tag[1001];
-	for(int i = 1; i < s.size(); i++){
+	map<char, bool> record, these_is_not, output;
+	char t = '#';
+	s = s + t;
+	for(int i = 0; i < s.size(); i++){
 		if(s[i] == t)
 			cnt++;
-		if(s[i] != t)
-			t = s[i], cnt = 1;
-		if(cnt == k){
-			record[s[i]]++, cnt = 1;
-			if(record[s[i]] == 2)
-				cout << s[i];
+		else{
+			if(cnt % k != 0)
+				these_is_not[s[i]];
+			cnt = 1;
+		}
+		if(i != s.size() - 1)
+			record[s[i]] = (cnt % k == 0);
+		t = s[i];
+	}
+	for(int i = 0; i < s.size(); i++){
+		//这里需要保证坏键的输出顺序是字符串本身的顺序，且只能输出一次
+		if(record[s[i]] && output[s[i]] == false){
+			cout << s[i];
+			output[s[i]] = true;
 		}
 	}
 	cout << endl;
-	bool flag = false;
-	for(int i = 0; i < s.size(); i++){
-		if(flag && s[i] == t)
-			cnt++;
-		if(flag && cnt == k)
-			tag[i - k + 1] = 1, cnt = 0;
-		if(flag && s[i] != t)
-			flag = false;
-		if((!flag) && record[s[i]] > 1)
-			cnt == 1, flag = true, t = s[i];
-	}
-	for(int i = 0; i < s.size(); i++){
+	for(int i = 0; i < s.size() - 1; i++){
 		cout << s[i];
-		if(tag[i] == 1)
+		if(record[s[i]])
 			i += (k - 1);
 	}
 	cout << endl;
