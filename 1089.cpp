@@ -10,9 +10,9 @@ int main(){
 		cin >> arr[i];
 	for(int i = 0; i < N; i++)
 		cin >> arr_res[i];
-	for(i = 0; i < N - 1 && arr_res[i] < arr_res[i + 1]; i++);
-	for(j = N - 1; j > 0 && arr[j] == arr_res[j]; j--);
-	if(i == j){
+	for(i = 0; i < N - 1 && arr_res[i] <= arr_res[i + 1]; i++);
+	for(j = i + 1; j < N && arr[j] == arr_res[j]; j++);
+	if(j == N){
 		cout << "Insertion Sort" << endl;
 		sort(arr.begin(), arr.begin() + i + 2);
 	}else{
