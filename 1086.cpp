@@ -4,30 +4,47 @@
 using namespace std;
 struct node {
 	int data;
-	node *left, *right;
+	node *left;
+	node *right;
 };
-void inorder(node *tree){
-	if(tree->left) inorder(tree->left);
-	cout << tree->data << " ";
-	if(tree->right) inorder(tree->right);
+int N, n;
+node *build_tree(vector<int> pre, vector<int> in, int a = 0, int b = N, int c = 0, int d = N){
+	if(a < b && c < d){
+		int i;
+		node *tree = new node();
+		tree->data = pre[a];
+		for(i = 0; i < d - c && in[c + i] != pre[a]; i++);
+		tree->left = build_tree(pre, in, a + 1, a + i + 1, c, c + i);
+		tree->right = build_tree(pre, in, a + i + 1, b, c + i + 1, d);
+		return tree;
+	}
+	else
+		return NULL;
+}
+void post_order(node *tree, vector<int> &arr){
+	if(tree->left) post_order(tree->left, arr);
+	if(tree->right) post_order(tree->right, arr);
+	arr.push_back(tree->data);
+	delete tree;
 }
 int main(){
-	int N, n;
 	cin >> N;
 	stack<int> sta;
-	vector<int> arr;
+	vector<int> pre, in, arr;
 	for(int i = 0; i < 2 * N; i++){
 		string t;
 		cin >> t;
 		if(t == "Push"){
 			cin >> n;
-			sta.push(n);
+			sta.push(n), pre.push_back(n);
 		}
 		else
-			arr.push_back(sta.top()), sta.pop();
+			in.push_back(sta.top()), sta.pop();
 	}
-	for(int i = 0; i < N; i++)
-		cout << arr[i] << " ";
+	post_order(build_tree(pre, in), arr);
+	cout << arr[0];
+	for(int i = 1; i < N; i++)
+		cout << " " << arr[i];
 	cout << endl;
 	return 0;
 }
