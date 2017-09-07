@@ -1,4 +1,4 @@
-#include <iostream>
+#include <cstdio>
 #include <vector>
 using namespace std;
 struct node {
@@ -13,24 +13,23 @@ bool is_tree(vector<int> arr, int a, int b, bool f){
 		for(i = a + 1; i < b && arr[i] < flag; i++);
 	else
 		for(i = a + 1; i < b && arr[i] >= flag; i++);
-	for(int j = i; j < b; j++){
-		if((f && arr[j] < flag) || (!f && arr[i] >= flag))
+	for(int j = i; j < b; j++)
+		if((f && arr[j] < flag) || (!f && arr[j] >= flag))
 			return false;
-	}
 	is_tree(arr, a + 1, i, f);
 	is_tree(arr, i, b, f);
 }
-node *build_tree(vector<int> arr, int a, int b, bool flag){
+node *build_tree(vector<int> arr, int a, int b, bool f){
 	if(a < b){
 		node *n = new node();
 		n->data = arr[a];
 		int i;
-		if(flag)
+		if(f)
 			for(i = a + 1; i < b && arr[i] < arr[a]; i++);
 		else
 			for(i = a + 1; i < b && arr[i] >= arr[a]; i++);
-		n->right = build_tree(arr, a + 1, i, flag);
-		n->left = build_tree(arr, i, b, flag);
+		n->right = build_tree(arr, a + 1, i, f);
+		n->left = build_tree(arr, i, b, f);
 		return n;
 	}
 	else
@@ -43,32 +42,30 @@ void postorder(node *t, vector<int> &po){
 	delete t;
 }
 void print_arr(vector<int> arr){
-	for(int i = 0; i < arr.size(); i++){
-		if(i != 0)
-			cout << " ";
-		cout << arr[i];
-	}
-	cout << endl;
+	printf("%d", arr[0]);
+	for(int i = 1; i < arr.size(); i++)
+		printf(" %d", arr[i]);
+	printf("\n");
 }
 int main(){
 	int N;
-	cin >> N;
+	scanf("%d", &N);
 	vector<int> preorder(N), po;
 	for(int i = 0; i < N; i++)
-		cin >> preorder[i];
+		scanf("%d", &preorder[i]);
 	if(is_tree(preorder, 0, N, true)){
-		cout << "YES" << endl;
+		printf("YES\n");
 		node *tree = build_tree(preorder, 0, N, true);
 		postorder(tree, po);
 		print_arr(po);
 	}
 	else if(is_tree(preorder, 0, N, false)){
-		cout << "YES" << endl;
+		printf("YES\n");
 		node *tree = build_tree(preorder, 0, N, false);
 		postorder(tree, po);
 		print_arr(po);
 	}
 	else
-		cout << "NO" << endl;
+		printf("NO\n");
 	return 0;
 }
